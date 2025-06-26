@@ -37,7 +37,7 @@ And then use this library (change `(the latest version)` to the latest version!)
 </dependency>
 ```
 
-# Contributing
+# Contributing1
 Contributions are welcome! :D
 
 Most contributions will require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to,

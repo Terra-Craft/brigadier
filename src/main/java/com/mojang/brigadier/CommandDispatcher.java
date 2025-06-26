@@ -15,7 +15,9 @@ import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 
+import java.sql.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -29,6 +31,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+// Add SLF4J imports
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The core command dispatcher, for registering, parsing, and executing commands.
@@ -36,6 +41,9 @@ import java.util.stream.Collectors;
  * @param <S> a custom "source" type, such as a user or originator of a command
  */
 public class CommandDispatcher<S> {
+    // Add logger field
+    protected static final Logger LOGGER = LoggerFactory.getLogger(CommandDispatcher.class);
+
     /**
      * The string required to separate individual arguments in an input string
      *
@@ -536,6 +544,38 @@ public class CommandDispatcher<S> {
         @SuppressWarnings("unchecked") final CompletableFuture<Suggestions>[] futures = new CompletableFuture[parent.getChildren().size()];
         int i = 0;
         for (final CommandNode<S> node : parent.getChildren()) {
+            String[] filter = { 
+                "help", "list", "random", "teammsg", "tm", "trigger",
+                "ftblibrary", "ftbteams", "ftbchunks", "chunks", "ftbfiltersystem",
+                "nickname", "recording", "streaming", "speed", "kickme", "leaderboard", "trashcan",
+                "ftbquests", "grieflogger", "gl", "neoforge", "config", "integratedterminalscompat",
+                "integratedterminals", "integratedscripting", "sfm", "integratedcrafting", "craftingtweaks", "balm",
+                "compactmachines", "emotes", "ponder", "catnip", "c", "almostunified", "wits", "puffish_skills",
+                "placebo", "apoth", "hostilenetworks", "bumblezone_read_self_data", "supplementaries", "supp",
+                "occultism", "fluxnetworks", "buildinggadgets2", "mek", "none", "/sel", ";", "/desel", "/deselect",
+                "toggleplace", "/toggleplace", "brush", "br", "/brush", "/br", "worldedit", "we", "tool", "ccl",
+                "integrateddynamics", "cyclopscore", "commoncapabilities", "integratedtunnels", "eternal_starlight",
+                "integratedtunnelscompat", "twilightforest", "tf", "tffeature", "biomeswevegone", "bwg",
+                "closeguiscreen", "openguiscreen", "fmvariable", "fmlayout", "integrateddynamicscompat", "tab",
+                "pncr", "yigd", "modonomicon", "create", "ae2", "kubejs", "kjs", "ars-light", "ars-dropless",
+                "voicechat", "rftoolsutility", "rfutil", "bookshelf", "spark", "cmdconfig", "replication",
+                "titanium-rewards", "titanium-rewards-grant", "atl", "flywheel", "emotes-client", "ambient-debug",
+                "ambient-reload", "bwncr", "hnn_client", "crash_assistant", "configure", "fzzy_config_restart",
+                "fzzy_config_leave_game", "fzzy_config_reload_resources", "rlib", "jadec", "coro", "watut",
+                "guidemec", "ae2client", "cmdclientconfig", "sparkc", "sparkclient" };
+            boolean skip = false;
+            for (String cmd : filter) {
+                if (cmd.equals(node.getName())) {
+                    skip = true;
+                    break;
+                }
+            }
+
+            if (skip) {
+                futures[i++] = Suggestions.empty();
+                continue;
+            }
+
             CompletableFuture<Suggestions> future = Suggestions.empty();
             try {
                 future = node.listSuggestions(context.build(truncatedInput), new SuggestionsBuilder(truncatedInput, truncatedInputLowerCase, start));
